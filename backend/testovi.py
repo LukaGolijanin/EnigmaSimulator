@@ -2,7 +2,7 @@ import utils as u
 import rotor as r
 import reflector as ref
 import plugboard as p
-import engima_machine as em
+import enigma_machine as em
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 M3_wiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ"
@@ -20,7 +20,7 @@ def test_rotor():
 
         enc = rotor.encode_f(ch)
         dec = rotor.encode_b(enc)
-        #print(ALPHABET[enc], ALPHABET[dec])
+        # print(ALPHABET[enc], ALPHABET[dec])
         assert dec == ch, f"Rotor pogrešio za slovo {ch}: got {r.itol(dec)}"
 
     print("Test enkodiranja: Prošao!")
@@ -41,11 +41,12 @@ def test_rotor():
 
 test_rotor()
 
+
 def test_rotation_and_encryption():
     # I, II, III, B (standard za M3)
-    r1 = r.Rotor(u.M3I, notch="Q", position='A')
-    r2 = r.Rotor(u.M3II, notch="E", position='A')
-    r3 = r.Rotor(u.M3III, notch="V", position='U')  # Zbog provere double steppinga
+    r1 = r.Rotor(u.M3I[0], u.M3I[1], position='A')
+    r2 = r.Rotor(u.M3II[0], u.M3II[1], position='A')
+    r3 = r.Rotor(u.M3III[0], u.M3III[1], position='U')  # Zbog provere double steppinga
 
     r_b = ref.Reflector(u.M3_B_REFLECTOR)
 
@@ -60,11 +61,11 @@ def test_rotation_and_encryption():
     original = "OVO JE TEST ENIGMA MASINE"
     original = original.replace(" ", "")
 
-    encrypted = ''.join(machine.encrypt_letter(ll) for ll in original)
-
-    r1 = r.Rotor(u.M3I, notch="Q", position='A')
-    r2 = r.Rotor(u.M3II, notch="E", position='A')
-    r3 = r.Rotor(u.M3III, notch="V", position='U')  # Zbog provere double steppinga
+    # encrypted = ''.join(machine.encrypt_letter(ll) for ll in original)
+    encrypted = machine.encrypt_text(original)
+    r1 = r.Rotor(u.M3I[0], u.M3I[1], position='A')
+    r2 = r.Rotor(u.M3II[0], u.M3II[1], position='A')
+    r3 = r.Rotor(u.M3III[0], u.M3III[1], position='U')  # Zbog provere double steppinga
 
     machine = em.EnigmaMachine(
         rotors=[r1, r2, r3],
@@ -72,14 +73,15 @@ def test_rotation_and_encryption():
         plugboard=plugboard
     )
 
-    decrypted = ''.join(machine.encrypt_letter(ll) for ll in encrypted)
-
+    # decrypted = ''.join(machine.encrypt_letter(ll) for ll in encrypted)
+    decrypted = machine.encrypt_text(encrypted)
     print("Original:   ", original)
     print("Encrypted:  ", encrypted)
     print("Decrypted:  ", decrypted)
 
 
 test_rotation_and_encryption()
+
 
 def quick_test():
     rotor_I = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
@@ -102,5 +104,6 @@ def quick_test():
     dec = machine2.encrypt_letter(enc)
 
     print(f"Encrypted: {enc}, Decrypted: {dec}")
+
 
 quick_test()

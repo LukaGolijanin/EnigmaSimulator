@@ -1,8 +1,8 @@
-from utils import ltoi, itol
+from backend.utils import ltoi, itol
 from typing import List
-from rotor import Rotor
-from reflector import Reflector
-from plugboard import Plugboard
+from backend.rotor import Rotor
+from backend.reflector import Reflector
+from backend.plugboard import Plugboard
 
 
 class EnigmaMachine:
@@ -23,45 +23,62 @@ class EnigmaMachine:
         # Osnovno rotiranje rotora (desni uvek)
         # pawl and ratchet sistem
 
-        self.right.step()
+        if self.middle.rotation_needed():
+            self.left.step()
+            # Double stepping
+            self.middle.step()
 
         if self.right.rotation_needed():
             self.middle.step()
+            print("NOTCH: " + self.right.position_char())
 
-        if self.middle.rotation_needed():
-            self.left.step()
-            # Double steppingc
-            self.middle.step()
+        self.right.step()
 
     def encrypt_letter(self, letter):
         # Sifrovanje jednog slova
 
+        path = [letter]
+
         if not letter.isalpha():
-            return letter  # ignorisanje
+            return None, []  # ignorisanje
 
         letter = letter.upper()
 
         self.step_rotors()
 
         letter = self.plugboard.swap(letter)
-
+        path.append(letter)
         signal = ltoi(letter)
 
         # Rotor unapred
         signal = self.right.encode_f(signal)
+        path.append(itol(signal))
         signal = self.middle.encode_f(signal)
+        path.append(itol(signal))
         signal = self.left.encode_f(signal)
-
+        path.append(itol(signal))
         # Reflector
         signal = self.reflector.reflect(signal)
-
+        path.append(itol(signal))
         # Rotor unazad
         signal = self.left.encode_b(signal)
+        path.append(itol(signal))
         signal = self.middle.encode_b(signal)
+        path.append(itol(signal))
         signal = self.right.encode_b(signal)
-
+        path.append(itol(signal))
         # Ponovo plugboard
         letter = itol(signal)
         letter = self.plugboard.swap(letter)
+        path.append(letter)
 
-        return letter
+        return letter, path
+
+    def encrypt_text(self, message: str):
+        message = message.upper()
+        message = message.replace(" ", "")
+        result = ""
+        for letter in message:
+            result = result + self.encrypt_letter(letter)
+
+        return result
