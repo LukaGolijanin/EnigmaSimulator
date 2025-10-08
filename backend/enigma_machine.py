@@ -79,6 +79,7 @@ class EnigmaMachine:
         message = message.replace(" ", "")
         result = ""
         for letter in message:
-            result = result + self.encrypt_letter(letter)
-
+            encrypted_letter, _ = self.encrypt_letter(letter)
+            if encrypted_letter:
+                result += encrypted_letter
         return result

@@ -1,13 +1,15 @@
+import ctypes
+
 import customtkinter as ctk
 from backend.enigma_machine import EnigmaMachine
 from backend.rotor import Rotor
 from backend.reflector import Reflector
 from backend.plugboard import Plugboard
 import backend.utils as u
-from front.widgets import SpinnerSelector, RotorDisplay, EnigmaKeyboard
+from front.widgets import SpinnerSelector, RotorDisplay, EnigmaKeyboard, PlugboardWidget
 from front.visualizer import EnigmaVisualizer
 
-ROTOR_NAMES = ["I", "II", "III", "IIII", "IV", "V", "VI", "VII", "VIII"]
+ROTOR_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
 REFLECTOR_NAMES = ["M3_A", "M3_B", "M3_C"]
 POSITIONS = [chr(i) for i in range(u.ORD_A, ord('Z') + 1)]
 RING_SETTINGS = list(range(26))
@@ -52,6 +54,15 @@ class EnigmaGUI:
         self.root = ctk.CTk()
         self.root.bind("<Key>", self.on_key_event)
         self.root.title("Enigma Simulator")
+        """
+        user32 = ctypes.windll.user32
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
+
+        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.root.resizable(True, True)
+        self.root.update()
+        """
         self.root.state("zoomed")
         self.root.update()
         self.machine = None
@@ -60,7 +71,7 @@ class EnigmaGUI:
         self.plaintext = ""
         self.ciphertext = ""
         self.last_path = None
-
+        self.plugboard = None
         self.create_widgets()
 
     def on_key_event(self, event):
@@ -69,65 +80,68 @@ class EnigmaGUI:
             self.on_key_press(char)
 
     def reflector_choice(self, frame):
-        ctk.CTkLabel(frame, text="Reflektor").grid(row=6, column=0, padx=10, pady=5)
+        ctk.CTkLabel(frame, text="Reflektor").grid(row=7, column=1, padx=10, pady=5)
         self.reflector_var = ctk.StringVar(value=REFLECTOR_NAMES[0])
         self.reflector_var = ctk.CTkOptionMenu(frame, values=REFLECTOR_NAMES, variable=self.reflector_var)
-        self.reflector_var.grid(row=7, column=0, padx=10)
+        self.reflector_var.grid(row=8, column=1, padx=10)
 
     def rotors(self, frame):
         # Rotor 1
         ctk.CTkLabel(frame, text="Levi Rotor").grid(row=0, column=0, padx=10, pady=5)
         self.left_rotor_var = ctk.StringVar(value=ROTOR_NAMES[0])
         self.left_rotor_dropdown = ctk.CTkOptionMenu(frame, values=ROTOR_NAMES, variable=self.left_rotor_var)
-        self.left_rotor_dropdown.grid(row=1, column=0, padx=10)
+        self.left_rotor_dropdown.grid(row=1, column=0, padx=5)
 
         ctk.CTkLabel(frame, text="Pozicija").grid(row=0, column=1, padx=10)
         self.left_pos_selector = SpinnerSelector(frame, initial="A", mode="letter")
-        self.left_pos_selector.grid(row=1, column=1, padx=10)
+        self.left_pos_selector.grid(row=1, column=1, padx=5)
 
         ctk.CTkLabel(frame, text="Ringstellung").grid(row=0, column=2, padx=10)
         self.left_ring_selector = SpinnerSelector(frame, initial=0, mode="number")
-        self.left_ring_selector.grid(row=1, column=2, padx=10)
+        self.left_ring_selector.grid(row=1, column=2, padx=5)
 
         # Rotor 2
         ctk.CTkLabel(frame, text="Srednji Rotor").grid(row=2, column=0, padx=10, pady=5)
         self.middle_rotor_var = ctk.StringVar(value=ROTOR_NAMES[1])
         self.middle_rotor_dropdown = ctk.CTkOptionMenu(frame, values=ROTOR_NAMES, variable=self.middle_rotor_var)
-        self.middle_rotor_dropdown.grid(row=3, column=0, padx=10)
+        self.middle_rotor_dropdown.grid(row=3, column=0, padx=5)
 
         ctk.CTkLabel(frame, text="Pozicija").grid(row=2, column=1, padx=10)
         self.middle_pos_selector = SpinnerSelector(frame, initial="A", mode="letter")
-        self.middle_pos_selector.grid(row=3, column=1, padx=10)
+        self.middle_pos_selector.grid(row=3, column=1, padx=5)
 
         ctk.CTkLabel(frame, text="Ringstellung").grid(row=2, column=2, padx=10)
         self.middle_ring_selector = SpinnerSelector(frame, initial=0, mode="number")
-        self.middle_ring_selector.grid(row=3, column=2, padx=10)
+        self.middle_ring_selector.grid(row=3, column=2, padx=5)
 
         # Rotor 3
         ctk.CTkLabel(frame, text="Desni Rotor").grid(row=4, column=0, padx=10, pady=5)
         self.right_rotor_var = ctk.StringVar(value=ROTOR_NAMES[2])
         self.right_rotor_dropdown = ctk.CTkOptionMenu(frame, values=ROTOR_NAMES, variable=self.right_rotor_var)
-        self.right_rotor_dropdown.grid(row=5, column=0, padx=10)
+        self.right_rotor_dropdown.grid(row=5, column=0, padx=5)
 
         ctk.CTkLabel(frame, text="Pozicija").grid(row=4, column=1, padx=10)
         self.right_pos_selector = SpinnerSelector(frame, initial="A", mode="letter")
-        self.right_pos_selector.grid(row=5, column=1, padx=10)
+        self.right_pos_selector.grid(row=5, column=1, padx=5)
 
         ctk.CTkLabel(frame, text="Ringstellung").grid(row=4, column=2, padx=10)
         self.right_ring_selector = SpinnerSelector(frame, initial=0, mode="number")
-        self.right_ring_selector.grid(row=5, column=2, padx=10)
+        self.right_ring_selector.grid(row=5, column=2, padx=5)
+
+        for col in range(3):
+            frame.grid_columnconfigure(col, weight=1)
 
     def outputs(self, frame):
         self.plaintext_label = ctk.CTkLabel(frame, text="Poruka:", font=("Arial", 16))
         self.plaintext_label.pack(pady=(10, 0))
 
-        self.plaintext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18))
+        self.plaintext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18), wraplength=300)
         self.plaintext_display.pack(pady=(5, 10))
 
         self.ciphertext_label = ctk.CTkLabel(frame, text="Šifrovana poruka:", font=("Arial", 16))
         self.ciphertext_label.pack(pady=(10, 0))
 
-        self.ciphertext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18))
+        self.ciphertext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18), wraplength=300)
         self.ciphertext_display.pack(pady=(5, 10))
 
         self.buffer_label = ctk.CTkLabel(frame, text="Prethodno šifrovane poruke:", font=("Arial", 16))
@@ -186,8 +200,10 @@ class EnigmaGUI:
         reflector = Reflector(get_reflector_wiring(reflector_name))
 
         # Plugboard za sada prazan
-        plugboard = Plugboard({})
-
+        if self.plugboard is not None:
+            plugboard = self.plugboard
+        else:
+            plugboard = Plugboard({})
         self.machine = EnigmaMachine(
             rotors=[left_rotor, middle_rotor, right_rotor],
             reflector=reflector,
@@ -196,34 +212,24 @@ class EnigmaGUI:
 
     def create_widgets(self):
         main_frame = ctk.CTkFrame(self.root)
-        main_frame.pack(pady=20, padx=20, fill="both", expand=True)
-
-        self.keyboard_frame = ctk.CTkFrame(self.root)
-        self.keyboard_frame.pack(pady=10)
-
-        self.keyboard = EnigmaKeyboard(self.keyboard_frame, on_key_press=self.on_key_press)
-        self.keyboard.pack()
-        self.output_label = ctk.CTkLabel(self.keyboard_frame, text="", font=("Arial", 24))
-        self.output_label.pack(pady=(10, 5))
-
-        self.toggle_flow_button = ctk.CTkButton(
-            self.keyboard_frame,
-            text="Prikaži tok",
-            command=self.toggle_visual_frame
-        )
-        self.toggle_flow_button.pack(pady=(10, 5))
+        main_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         self.param_frame = ctk.CTkFrame(main_frame)
         self.param_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.param_frame.grid_columnconfigure(0, weight=1)
+        self.param_frame.grid_columnconfigure(1, weight=0)
+        self.param_frame.grid_columnconfigure(2, weight=1)
+
+        filler_lbl = ctk.CTkLabel(self.param_frame, text="", font=("Arial", 24))
+        filler_lbl.grid(row=10, column=1, pady=10)
+        start_button = ctk.CTkButton(self.param_frame, text="KREIRAJ MAŠINU", command=self.on_create_machine)
+        start_button.grid(row=11, column=1, pady=10)
 
         self.visual_frame = ctk.CTkFrame(main_frame)
         self.visual_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
         self.rotors(self.param_frame)
         self.reflector_choice(self.param_frame)
-
-        start_button = ctk.CTkButton(self.param_frame, text="KREIRAJ MAŠINU", command=self.on_create_machine)
-        start_button.grid(row=8, column=0, pady=10)
 
         self.output_frame = ctk.CTkFrame(main_frame)
         self.outputs(self.output_frame)
@@ -232,13 +238,74 @@ class EnigmaGUI:
         self.rotor_display_frame = ctk.CTkFrame(main_frame)
         self.rotor_display_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
-        main_frame.grid_columnconfigure(0, weight=1)  # leva kolona - param ili visual
-        main_frame.grid_columnconfigure(1, weicght=1)  # rotor_display - malo uži centar
-        main_frame.grid_columnconfigure(2, weight=2)  # output - desno
+        main_frame.grid_columnconfigure(0, weight=2)  # leva kolona - param ili visual
+        main_frame.grid_columnconfigure(1, weight=3)  # rotor_display - malo uži centar
+        main_frame.grid_columnconfigure(2, weight=4)  # output - desno
 
         main_frame.grid_rowconfigure(0, weight=1)
-
         self.visual_frame.grid_remove()
+
+        self.bottom_frame = ctk.CTkFrame(self.root)
+        self.bottom_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+
+        separator = ctk.CTkFrame(self.bottom_frame, width=2, fg_color="gray")  # tanka vertikalna linija
+        separator.grid(row=0, column=1, sticky="ns", padx=5)
+
+        # podesimo da bottom_frame zauzme širinu
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=0)  # bottom_frame je "fiksna" visina
+
+        self.plugboard_frame = ctk.CTkFrame(self.bottom_frame)
+        self.plugboard_frame.grid(row=0, column=0, padx=10, sticky="ns")
+
+        self.plugboard_widget = PlugboardWidget(self.plugboard_frame, on_update=self.on_plugboard_update)
+        self.plugboard_widget.grid(row=0, column=0, columnspan=2)
+
+        self.connection_label = ctk.CTkLabel(self.plugboard_frame, text="Konekcije:")
+        self.connection_label.grid(row=1, column=0, columnspan=2)
+
+        self.connection_list = ctk.CTkLabel(self.plugboard_frame, text="")
+        self.connection_list.grid(row=2, column=0, columnspan=2)
+
+        self.remove_last_button = ctk.CTkButton(
+            self.plugboard_frame,
+            text="Undo",
+            command=self.on_undo_plugboard)
+        self.remove_last_button.grid(row=3, column=1, sticky="s", pady=30)
+
+        self.clear_all_button = ctk.CTkButton(
+            self.plugboard_frame,
+            text="Obriši sve",
+            command=self.on_clear_plugboard
+        )
+        self.clear_all_button.grid(row=3, column=0, sticky="s", pady=30)
+
+        self.keyboard_frame = ctk.CTkFrame(self.bottom_frame)
+        self.keyboard_frame.grid(row=0, column=2, sticky="ns")
+
+        self.keyboard = EnigmaKeyboard(self.keyboard_frame, on_key_press=self.on_key_press)
+        self.keyboard.grid(row=0, column=0)
+
+        self.output_label = ctk.CTkLabel(self.keyboard_frame, text="", font=("Arial", 14))
+        self.output_label.grid(row=1, column=0, sticky="n")
+
+        self.toggle_flow_button = ctk.CTkButton(
+            self.keyboard_frame,
+            text="Prikaži tok",
+            command=self.toggle_visual_frame
+        )
+        self.toggle_flow_button.grid(row=2, column=0, pady=(5, 5))
+
+        self.bottom_frame.grid_columnconfigure(0, weight=1)
+        self.bottom_frame.grid_columnconfigure(1, weight=1)
+
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+
+        self.bottom_frame.grid_columnconfigure(0, weight=1)  # plugboard_frame
+        self.bottom_frame.grid_columnconfigure(1, weight=0)  # separator (fiksna širina)
+        self.bottom_frame.grid_columnconfigure(2, weight=1)  # keyboard_frame
+
     def on_create_machine(self):
         self.rotor_display_widgets = []
 
@@ -282,6 +349,9 @@ class EnigmaGUI:
         self.plaintext_display.configure(text=self.plaintext)
         self.ciphertext_display.configure(text=self.ciphertext)
 
+        self.plaintext_display.configure(text=u.safe_truncate(self.plaintext))
+        self.ciphertext_display.configure(text=u.safe_truncate(self.ciphertext))
+
         if self.visualizer.visual_canvas:
             self.visualizer.visualize_letter_flow(path)
 
@@ -290,6 +360,11 @@ class EnigmaGUI:
             display.update_display(position_char=chr(rotor.position + u.ORD_A))
 
     def clear_buffer(self):
+        self.plaintext = ""
+        self.ciphertext = ""
+        self.last_path = None
+        self.plaintext_display.configure(text="")
+        self.ciphertext_display.configure(text="")
         self.buffer_textbox.configure(state="normal")
         self.buffer_textbox.delete("1.0", "end")
         self.buffer_textbox.configure(state="disabled")
@@ -300,7 +375,7 @@ class EnigmaGUI:
             return
 
         self.buffer_textbox.configure(state="normal")
-        self.buffer_textbox.insert("end", self.ciphertext + "\n")
+        self.buffer_textbox.insert("end", self.ciphertext + "\n" + "------------------" + "\n")
         self.buffer_textbox.configure(state="disabled")
 
         self.plaintext = ""
@@ -331,5 +406,27 @@ class EnigmaGUI:
             else:
                 self.visualizer.draw_static_diagram()
             self.toggle_flow_button.configure(text="Sakrij tok")
+
+    def on_plugboard_update(self, connections):
+        try:
+            # Kreiraj novi Plugboard objekat sa aktuelnim konekcijama
+            self.plugboard = Plugboard(connections)
+
+            # Update GUI labelu sa tekstom konekcija
+            if connections:
+                pairs_text = ", ".join(f"{a}-{b}" for a, b in connections)
+            else:
+                pairs_text = ""
+            self.connection_list.configure(text=f"{pairs_text}")
+
+        except ValueError as e:
+            print(f"Greska u plugboard konfiguraciji: {e}")
+
+    def on_undo_plugboard(self):
+        self.plugboard_widget.remove_last_connection()
+
+    def on_clear_plugboard(self):
+        self.plugboard_widget.clear_all_connections()
+
     def run(self):
         self.root.mainloop()

@@ -1,6 +1,7 @@
 ALPHABET_NUM = 26
 ORD_A = ord('A')
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+MAX_LABEL_LENGTH = 81
 
 # Enigma I (1930)
 M3I = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "E"]
@@ -30,3 +31,8 @@ def ltoi(letter) -> int:
 
 def itol(i) -> str:
     return chr((i % ALPHABET_NUM) + ORD_A)
+
+def safe_truncate(text, max_length=MAX_LABEL_LENGTH):
+    if len(text) > max_length:
+        return text[:max_length] + "..."
+    return text
