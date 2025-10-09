@@ -1,4 +1,4 @@
-import ctypes
+# import ctypes
 
 import customtkinter as ctk
 from backend.enigma_machine import EnigmaMachine
@@ -6,33 +6,36 @@ from backend.rotor import Rotor
 from backend.reflector import Reflector
 from backend.plugboard import Plugboard
 import backend.utils as u
-from front.widgets import SpinnerSelector, RotorDisplay, EnigmaKeyboard, PlugboardWidget
+from front.widgets import SpinnerSelector, RotorDisplay
+from front.plugboard_widget import PlugboardWidget
+from front.enigma_keyboard import EnigmaKeyboard
 from front.visualizer import EnigmaVisualizer
+from front.lightboard_keyboard import LightboardKeyboard
 
 ROTOR_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
-REFLECTOR_NAMES = ["M3_A", "M3_B", "M3_C"]
+REFLECTOR_NAMES = ["R_A", "R_B", "R_C"]
 POSITIONS = [chr(i) for i in range(u.ORD_A, ord('Z') + 1)]
 RING_SETTINGS = list(range(26))
 
 
 def get_reflector_wiring(name):
-    if name == "M3_A":
-        return u.M3_A_REFLECTOR
-    elif name == "M3_B":
-        return u.M3_B_REFLECTOR
-    elif name == "M3_C":
-        return u.M3_C_REFLECTOR
+    if name == "R_A":
+        return u.A_REFLECTOR
+    elif name == "R_B":
+        return u.B_REFLECTOR
+    elif name == "R_C":
+        return u.C_REFLECTOR
     else:
         raise ValueError("Nepostojeći reflektor!")
 
 
 def get_wiring_for_name(param):
     if param == "I":
-        return u.M3I
+        return u.EnigmaI
     elif param == "II":
-        return u.M3II
+        return u.EnigmaII
     elif param == "III":
-        return u.M3III
+        return u.EnigmaIII
     elif param == "IV":
         return u.M3IV
     elif param == "V":
@@ -333,6 +336,11 @@ class EnigmaGUI:
             self.rotor_display_widgets.append(rotor_display)
             rotor_display.update_display(position_char=chr(rotor.position + u.ORD_A))
 
+        if hasattr(self, 'lightboard'):
+            self.lightboard.destroy()
+        self.lightboard = LightboardKeyboard(self.rotor_display_frame)
+        self.lightboard.grid(row=1, column=0, columnspan=5, pady=(10, 0))
+
     def on_key_press(self, letter):
         if not self.machine:
             return
@@ -344,7 +352,8 @@ class EnigmaGUI:
         self.output_label.configure(text=f"{letter} -> {encrypted_char}")
 
         self.plaintext += letter
-        self.ciphertext += encrypted_char
+        if encrypted_char is not None:
+            self.ciphertext += encrypted_char
 
         self.plaintext_display.configure(text=self.plaintext)
         self.ciphertext_display.configure(text=self.ciphertext)
@@ -358,6 +367,8 @@ class EnigmaGUI:
         rotors = [self.machine.left, self.machine.middle, self.machine.right]
         for display, rotor in zip(self.rotor_display_widgets, rotors):
             display.update_display(position_char=chr(rotor.position + u.ORD_A))
+
+        self.lightboard.highlight_key(encrypted_char)
 
     def clear_buffer(self):
         self.plaintext = ""

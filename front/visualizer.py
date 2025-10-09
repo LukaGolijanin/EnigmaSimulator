@@ -123,4 +123,3 @@ class EnigmaVisualizer:
             canvas.create_text(x_to + 10, y, text=outp, fill="cyan", font=("Courier", 14, "bold"))
 
             canvas.create_text(20, y, text=stage_labels[i], anchor="w", fill="gray", font=("Arial", 10, "italic"))
-

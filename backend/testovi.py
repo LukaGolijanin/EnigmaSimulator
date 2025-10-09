@@ -44,11 +44,11 @@ test_rotor()
 
 def test_rotation_and_encryption():
     # I, II, III, B (standard za M3)
-    r1 = r.Rotor(u.M3I[0], u.M3I[1], position='A')
-    r2 = r.Rotor(u.M3II[0], u.M3II[1], position='A')
-    r3 = r.Rotor(u.M3III[0], u.M3III[1], position='U')  # Zbog provere double steppinga
+    r1 = r.Rotor(u.EnigmaI[0], u.EnigmaI[1], position='A')
+    r2 = r.Rotor(u.EnigmaII[0], u.EnigmaII[1], position='A')
+    r3 = r.Rotor(u.EnigmaIII[0], u.EnigmaIII[1], position='U')  # Zbog provere double steppinga
 
-    r_b = ref.Reflector(u.M3_B_REFLECTOR)
+    r_b = ref.Reflector(u.B_REFLECTOR)
 
     plugboard = p.Plugboard({})
 
@@ -63,9 +63,9 @@ def test_rotation_and_encryption():
 
     # encrypted = ''.join(machine.encrypt_letter(ll) for ll in original)
     encrypted = machine.encrypt_text(original)
-    r1 = r.Rotor(u.M3I[0], u.M3I[1], position='A')
-    r2 = r.Rotor(u.M3II[0], u.M3II[1], position='A')
-    r3 = r.Rotor(u.M3III[0], u.M3III[1], position='U')  # Zbog provere double steppinga
+    r1 = r.Rotor(u.EnigmaI[0], u.EnigmaI[1], position='A')
+    r2 = r.Rotor(u.EnigmaII[0], u.EnigmaII[1], position='A')
+    r3 = r.Rotor(u.EnigmaIII[0], u.EnigmaIII[1], position='U')  # Zbog provere double steppinga
 
     machine = em.EnigmaMachine(
         rotors=[r1, r2, r3],
@@ -84,22 +84,22 @@ test_rotation_and_encryption()
 
 
 def quick_test():
-    rotor_I = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
-    rotor_II = r.Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E", position='A')
-    rotor_III = r.Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V", position='A')
+    rotor_i = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
+    rotor_ii = r.Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E", position='A')
+    rotor_iii = r.Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V", position='A')
 
     reflector = ref.Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT")
     plugboard = p.Plugboard({})
 
-    machine1 = em.EnigmaMachine([rotor_I, rotor_II, rotor_III], reflector, plugboard)
+    machine1 = em.EnigmaMachine([rotor_i, rotor_ii, rotor_iii], reflector, plugboard)
 
     enc = machine1.encrypt_letter("A")
 
-    rotor2_I = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
-    rotor2_II = r.Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E", position='A')
-    rotor2_III = r.Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V", position='A')
+    rotor2_i = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
+    rotor2_ii = r.Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E", position='A')
+    rotor2_iii = r.Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V", position='A')
 
-    machine2 = em.EnigmaMachine([rotor2_I, rotor2_II, rotor2_III], reflector, plugboard)
+    machine2 = em.EnigmaMachine([rotor2_i, rotor2_ii, rotor2_iii], reflector, plugboard)
 
     dec = machine2.encrypt_letter(enc)
 
