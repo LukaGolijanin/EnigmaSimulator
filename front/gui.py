@@ -52,10 +52,11 @@ def get_wiring_for_name(param):
 
 class EnigmaGUI:
     def __init__(self):
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode("light")
         # customtkinter.set_default_color_theme("blue")
         self.root = ctk.CTk()
         self.root.bind("<Key>", self.on_key_event)
+        self.root.bind("<BackSpace>", self.clear_char)
         self.root.title("Enigma Simulator")
         """
         user32 = ctypes.windll.user32
@@ -135,18 +136,19 @@ class EnigmaGUI:
             frame.grid_columnconfigure(col, weight=1)
 
     def outputs(self, frame):
+        # Unet tekst
         self.plaintext_label = ctk.CTkLabel(frame, text="Poruka:", font=("Arial", 16))
         self.plaintext_label.pack(pady=(10, 0))
 
         self.plaintext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18), wraplength=300)
         self.plaintext_display.pack(pady=(5, 10))
-
+        # Šifrovan tekst
         self.ciphertext_label = ctk.CTkLabel(frame, text="Šifrovana poruka:", font=("Arial", 16))
         self.ciphertext_label.pack(pady=(10, 0))
 
         self.ciphertext_display = ctk.CTkLabel(frame, text="", font=("Courier", 18), wraplength=300)
         self.ciphertext_display.pack(pady=(5, 10))
-
+        # Prostor za čuvanje prethodno šifrovanih
         self.buffer_label = ctk.CTkLabel(frame, text="Prethodno šifrovane poruke:", font=("Arial", 16))
         self.buffer_label.pack(pady=(10, 0))
 
@@ -154,10 +156,17 @@ class EnigmaGUI:
         self.buffer_textbox.pack(pady=(5, 10))
         self.buffer_textbox.configure(state="disabled")
 
-        self.clear_button = ctk.CTkButton(frame, text="Obriši", command=self.clear_buffer)
-        self.clear_button.pack(pady=(0, 10))
+        self.button_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        self.button_frame.pack(pady=(0, 10))
+
+        self.clear_button = ctk.CTkButton(self.button_frame, text="Obriši sve", command=self.clear_buffer)
+        self.clear_button.pack(side="left", padx=(0, 10))  # razmak desno
+
+        self.clear2_button = ctk.CTkButton(self.button_frame, text="Obriši", command=self.clear_char)
+        self.clear2_button.pack(side="left")
+
         self.add_button = ctk.CTkButton(frame, text="Dodaj poruku", command=self.add_to_buffer)
-        self.add_button.pack(pady=(0,10))
+        self.add_button.pack(pady=(0, 10))
 
     def setup_machine(self):
         left_name = self.left_rotor_var.get()
@@ -202,7 +211,7 @@ class EnigmaGUI:
 
         reflector = Reflector(get_reflector_wiring(reflector_name))
 
-        # Plugboard za sada prazan
+        # Plugboard
         if self.plugboard is not None:
             plugboard = self.plugboard
         else:
@@ -328,6 +337,7 @@ class EnigmaGUI:
         for i, rotor in enumerate(rotors, start=1):
             rotor_display = RotorDisplay(
                 self.rotor_display_frame,
+                rotor_object=rotor,
                 rotor_wiring=rotor.wiring,
                 notch=rotor.notch,
                 position_char=rotor.position_char()
@@ -369,6 +379,13 @@ class EnigmaGUI:
             display.update_display(position_char=chr(rotor.position + u.ORD_A))
 
         self.lightboard.highlight_key(encrypted_char)
+
+    def clear_char(self, event=None):
+        self.plaintext = self.plaintext[:-1]
+        self.ciphertext = self.ciphertext[:-1]
+        self.last_path = self.last_path[:-1]
+        self.plaintext_display.configure(text=self.plaintext)
+        self.ciphertext_display.configure(text=self.ciphertext)
 
     def clear_buffer(self):
         self.plaintext = ""

@@ -50,12 +50,13 @@ class SpinnerSelector(ctk.CTkFrame):
 
 
 class RotorDisplay(ctk.CTkFrame):
-    def __init__(self, master, rotor_wiring, notch, position_char="A", **kwargs):
+    def __init__(self, master, rotor_object, rotor_wiring, notch, position_char="A", **kwargs):
         super().__init__(master, **kwargs)
+        self.rotor_object = rotor_object
         self.rotor_wiring = rotor_wiring
         self.notch = notch
         self.position = ord(position_char.upper()) - u.ORD_A
-
+        self.button = None
         self.cells = []
         self.create_display()
 
@@ -66,6 +67,8 @@ class RotorDisplay(ctk.CTkFrame):
             label.grid(row=i, column=0, pady=2)
             self.cells.append(label)
 
+        self.button = ctk.CTkButton(self, text="Nazad", command=self.rotate_backward)
+        self.button.grid(row=5, column=0, pady=(10, 0))
         self.update_display()
 
     def update_display(self, position_char=None):
@@ -90,3 +93,10 @@ class RotorDisplay(ctk.CTkFrame):
                 lbl.configure(fg_color="#456eba")  # plava za notch
             else:
                 lbl.configure(fg_color="#001d4d")
+
+    def rotate_backward(self):
+        self.position = (self.position - 1) % u.ALPHABET_NUM
+        self.update_display()
+
+        if hasattr(self, "rotor_object"):
+            self.rotor_object.undo_step()

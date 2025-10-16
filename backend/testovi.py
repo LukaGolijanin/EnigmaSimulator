@@ -26,7 +26,7 @@ def test_rotor():
     print("Test enkodiranja: Prošao!")
 
     print(f"Početna pozicija: {r.itol(rotor.position)}")
-    for _ in range(20):
+    for _ in range(40):
         rotor.step()
         print(f"Posle rotacije: {r.itol(rotor.position)}, rotation_needed: {rotor.rotation_needed()}")
 
@@ -90,18 +90,18 @@ def quick_test():
 
     reflector = ref.Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT")
     plugboard = p.Plugboard({})
-
+    # Prva mašina
     machine1 = em.EnigmaMachine([rotor_i, rotor_ii, rotor_iii], reflector, plugboard)
 
-    enc = machine1.encrypt_letter("A")
-
+    enc, _ = machine1.encrypt_letter("A")
+    # Druga mašina
     rotor2_i = r.Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q", position='A')
     rotor2_ii = r.Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", "E", position='A')
     rotor2_iii = r.Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", "V", position='A')
 
     machine2 = em.EnigmaMachine([rotor2_i, rotor2_ii, rotor2_iii], reflector, plugboard)
 
-    dec = machine2.encrypt_letter(enc)
+    dec, _ = machine2.encrypt_letter(enc)
 
     print(f"Encrypted: {enc}, Decrypted: {dec}")
 

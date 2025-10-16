@@ -37,37 +37,47 @@ class EnigmaMachine:
     def encrypt_letter(self, letter):
         # Sifrovanje jednog slova
 
+        # Koristi se za vizuelni prikaz prolaska slova kroz mašinu
         path = [letter]
 
+        # Ignorisanje karaktera ukoliko nije slovo
         if not letter.isalpha():
-            return None, []  # ignorisanje
+            return None, []
 
+        # Koristimo samo velika slova
         letter = letter.upper()
 
+        # Pokrećemo jednu iteraciju
         self.step_rotors()
 
+        # Zamena kroz priključnu tablu
         letter = self.plugboard.swap(letter)
         path.append(letter)
+
+        # Slovo se konvertuje u broj radi lakšeg funkcionisanja algoritma
         signal = ltoi(letter)
 
-        # Rotor unapred
+        # Prolazak kroz rotore unapred
         signal = self.right.encode_f(signal)
         path.append(itol(signal))
         signal = self.middle.encode_f(signal)
         path.append(itol(signal))
         signal = self.left.encode_f(signal)
         path.append(itol(signal))
-        # Reflector
+
+        # Reflektor
         signal = self.reflector.reflect(signal)
         path.append(itol(signal))
-        # Rotor unazad
+
+        # Prolazak kroz rotore unazad
         signal = self.left.encode_b(signal)
         path.append(itol(signal))
         signal = self.middle.encode_b(signal)
         path.append(itol(signal))
         signal = self.right.encode_b(signal)
         path.append(itol(signal))
-        # Ponovo plugboard
+
+        # Ponovni proces kroz priključnu tablu
         letter = itol(signal)
         letter = self.plugboard.swap(letter)
         path.append(letter)

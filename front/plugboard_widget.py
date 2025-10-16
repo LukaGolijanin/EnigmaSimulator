@@ -75,25 +75,29 @@ class PlugboardWidget(ctk.CTkFrame):
         # Ako je slovo povezano, ne radi nista
         if self._is_connected(letter):
             return
-
+        # Nije moguće više od 10 konekcija
         if len(self.plugboard_connections) >= 10:
             return
 
         # Selektuj / Deselektuj
         if self.selected_letter == letter:
+            # Situacija: Pokušaj konekcije sam sa sobom
             self.selected_letter = None
         else:
             if self.selected_letter is not None:
+                # Kreiranje para
                 pair = tuple(sorted([self.selected_letter, letter]))
                 if pair not in self.plugboard_connections:
                     self.plugboard_connections.append(pair)
-                    # Boja
+                    # Dodavanje boje ukoliko nismo prekoračili limit
                     if len(self.plugboard_connections) <= len(self.PAIR_COLORS):
                         self.pair_color_map[pair] = self.PAIR_COLORS[len(self.plugboard_connections) - 1]
                 self.selected_letter = None
             else:
+                # Čuvamo pritisnuto slovo
                 self.selected_letter = letter
 
+        # Ažuriramo interfejs
         self.update_display()
         if self.on_update:
             self.on_update(self.plugboard_connections)

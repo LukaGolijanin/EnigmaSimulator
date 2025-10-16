@@ -27,6 +27,9 @@ class Rotor:
         # Rotacija rotora
         self.position = (self.position + 1) % ALPHABET_NUM
 
+    def undo_step(self):
+        self.position = (self.position - 1) % ALPHABET_NUM
+
     def rotation_needed(self):
         # Da li treba da se aktivira sledeci rotor
         curr = itol(self.position)
