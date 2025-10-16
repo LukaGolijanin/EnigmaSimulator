@@ -52,7 +52,7 @@ def get_wiring_for_name(param):
 
 class EnigmaGUI:
     def __init__(self):
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("dark")
         # customtkinter.set_default_color_theme("blue")
         self.root = ctk.CTk()
         self.root.bind("<Key>", self.on_key_event)

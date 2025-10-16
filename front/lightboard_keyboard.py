@@ -50,6 +50,8 @@ class LightboardKeyboard(ctk.CTkFrame):
 
     def highlight_key(self, letter):
         self.reset_highlight()
+        if letter is None:
+            return
         btn = self.buttons.get(letter.upper())
         if btn:
             btn.configure(fg_color="yellow", text_color="black")
