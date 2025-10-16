@@ -75,7 +75,7 @@ class RotorDisplay(ctk.CTkFrame):
         if position_char is not None:
             self.position = ord(position_char.upper()) - u.ORD_A
 
-        for i, offset in enumerate([-2, -1, 0, 1, 2]):
+        for i, offset in enumerate([2, 1, 0, -1, -2]):
             pos = (self.position + offset) % u.ALPHABET_NUM
             char = u.ALPHABET[pos]
 
